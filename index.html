@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    
+<!--   start meshopt handling section   -->
+    <script src="https://cdn.jsdelivr.net/gh/zeux/meshoptimizer/js/meshopt_decoder.js"></script>
+    <script src="https://unpkg.com/three@0.137.0/examples/js/utils/WorkerPool.js"></script>
+    <script src="https://unpkg.com/three@0.137.0/examples/js/loaders/KTX2Loader.js"></script> 
+    <script src="gltf-packed.js"></script>
+    
+    
+<!--   technically, you could use modules instead; this also works! But it does seem to require importing a second copy of THREE, which could cause issues  -->
+<!--
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.137.0/build/three.module.js"
+        }
+      }
+    </script>
+    
+    <script type="module">
+      import { KTX2Loader } from 'https://unpkg.com/three@0.137.0/examples/jsm/loaders/KTX2Loader.js';
+      // this draco part shouldn't be needed, though, as it turns out it's already included
+      import { DRACOLoader } from 'https://unpkg.com/three@0.137.0/examples/jsm/loaders/DRACOLoader.js';
+      
+      THREE.KTX2Loader = KTX2Loader;
+      THREE.DRACOLoader = DRACOLoader; 
+    </script> 
+-->
+
+    
+    
+    
+  </head>
+  <body>
+    <a-scene>      
+      <a-assets>
+        <!--    
+        -->
+        <a-asset-item id="big-shell" src="https://cdn.glitch.global/acde86be-06bb-4403-881d-8d207c77228c/big-shell-gltfpack-2-2.glb?v=1665573242341"></a-asset-item>
+        
+
+        <!--    this asset was packed down from 180mb to 12mb using gltfpack
+                and specifically also use ktx2 texture encoding
+                specifically, using native binaries instead of npm install
+                command is:
+                gltfpack -cc -tc -tl 1024  -mm -mi -i big-shell-nofloor-recenter-2.glb -o big-shell-gltfpack-2-2-ktx2-1.glb
+                see: https://meshoptimizer.org/gltf/
+        -->
+        <a-asset-item id="big-shell-ktx2" src="https://cdn.glitch.global/e61b50a7-4dd5-4681-9de2-1466363354bd/4a49674e-78a0-403e-8f4b-36b5903ffdec.big-shell-gltfpack-2-2-ktx2-1.glb?v=1665874408766"></a-asset-item>
+      </a-assets>
+      
+    <!--   here we use meshopt-ktx2-draco-gltf-model instead of regular     -->
+      <a-entity meshopt-ktx2-draco-gltf-model="#big-shell-ktx2" shadow="cast:true; receive:true;" id="the-shell" scale="1 1 1" position="0 0 0"></a-entity>
+      
+      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+  </body>
+</html>

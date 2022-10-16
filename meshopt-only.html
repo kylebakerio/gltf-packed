@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    
+<!--   start meshopt handling section   -->
+    
+    <script src="https://cdn.jsdelivr.net/gh/zeux/meshoptimizer/js/meshopt_decoder.js"></script>
+    <script>
+      AFRAME.registerComponent("meshopt-gltf-model", {
+        schema: { type: 'model' },
+        init: function () {
+            const renderer = this.el.sceneEl.renderer
+            // Instantiate a loader
+            this.loader = new THREE.GLTFLoader()
+                          .setCrossOrigin('anonymous')
+                          .setMeshoptDecoder(MeshoptDecoder);
+
+            this.model = null;
+        },
+        update() {
+            var self = this;
+            var el = this.el;
+            var src = this.data;
+
+            if (!src) { return; }
+            this.remove();
+            // Load a glTF resource
+            this.loader.load(
+                // resource URL
+                src,
+                // called when the resource is loaded
+                function gltfLoaded(gltfModel) {
+                    self.model = gltfModel.scene || gltfModel.scenes[0];
+                    self.model.animations = gltfModel.animations;
+                    // setObject3D is needs an object3D, and the model is a group?
+                    let rootItem = new THREE.Object3D();
+                    rootItem.add(self.model)
+                    el.setObject3D('mesh', rootItem);
+                    el.emit('model-loaded', { format: 'gltf', model: self.model });
+                }, console.log,
+                function gltfFailed(error) {
+                    var message = (error && error.message) ? error.message : 'Failed to load glTF model';
+                    console.warn(message);
+                    el.emit('model-error', { format: 'gltf', src: src });
+                });
+        },
+        remove: function () {
+            if (!this.model) { return; }
+            this.el.removeObject3D('mesh');
+        }
+    });
+    </script>
+    
+<!--   end meshopt handling section   -->
+    
+  </head>
+  <body>
+    <a-scene>      
+      <a-assets>
+        <!--    this asset was packed down from 180mb to 12mb using gltfpack
+                specifically, using native binaries instead of npm install
+                the exact command was:
+                gltfpack -cc -mm -mi -i big-shell-nofloor-recenter-2.glb -o big-shell-gltfpack-2-2.glb
+        -->
+        <a-asset-item id="big-shell" src="https://cdn.glitch.global/acde86be-06bb-4403-881d-8d207c77228c/big-shell-gltfpack-2-2.glb?v=1665573242341"></a-asset-item>
+        <a-asset-item id="big-shell-ktx2" src="https://cdn.glitch.global/e61b50a7-4dd5-4681-9de2-1466363354bd/4a49674e-78a0-403e-8f4b-36b5903ffdec.big-shell-gltfpack-2-2-ktx2-1.glb?v=1665874408766"></a-asset-item>
+      </a-assets>
+      
+    <!--   here we use meshopt-gltf-model instead of regular     -->
+      <a-entity meshopt-gltf-model="#big-shell" shadow="cast:true; receive:true;" id="the-shell" scale="1 1 1" position="0 0 0"></a-entity>
+      
+      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+      <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+      <a-sky color="#ECECEC"></a-sky>
+    </a-scene>
+  </body>
+</html>
+
+https://github.com/aframevr/aframe/issues/4729
